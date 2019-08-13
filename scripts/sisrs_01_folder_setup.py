@@ -2,18 +2,22 @@
 
 '''
 Last edit: Devin McConnell May 23, 2019
-'''
 
-# This script preps the folder architecture for a SISRS run.
-# Taxon ID file (text file with Taxon IDs on new lines) must be in base SISRS folder
-# Arguments: (1) Path to Taxon ID file (text file with Taxon IDs on new lines)
-# Example: python scripts/folder_setup.py TaxonIDs
-# Output: Script will create lots of folders, including taxon folders in the RawReads, TrimReads, and SISRS_Run folders
+This script preps the folder architecture for a SISRS run.
+Taxon ID file (text file with Taxon IDs on new lines) must be in base SISRS folder OR
+Data Directory (Directory containing all data divided up by taxon)
+Arguments: (-rd/--rawData or -id) Path to data or Path to Taxon ID file
+Optional Argument: -trm/--trimmed (lets system know the data has been pretrimmed)
+Examples: python scripts/folder_setup.py -id TaxonIDs
+python scripts/folder_setup.py -rd /home/Documents/SISRS_Data/
+Output: Script will create lots of folders, including taxon folders in the RawReads, TrimReads, and SISRS_Run folders
+'''
 
 import sys
 import cProfile
 import os
 from os import listdir,path
+from cmdCheck import *
 from os.path import isdir, isfile, join
 
 '''
@@ -76,16 +80,23 @@ def fileStructure(sisrs_dir,taxa_list):
 
     if isdir(sisrs_dir) == False:
         os.mkdir(sisrs_dir)
-    os.mkdir(sisrs_dir+"/Reads")
-    os.mkdir(sisrs_dir+"/Reads/RawReads")
-    os.mkdir(sisrs_dir+"/Reads/TrimReads")
-    os.mkdir(sisrs_dir+"/Reads/SubsetReads")
-    os.mkdir(sisrs_dir+"/SISRS_Run")
-    os.mkdir(sisrs_dir+"/Reference_Genome")
-    os.mkdir(sisrs_dir+"/Reference_Genome/Annotations")
-    os.mkdir(sisrs_dir+"/Post_SISRS_Processing")
-    os.mkdir(sisrs_dir+"/R_Analyses")
-    os.mkdir(sisrs_dir+"/Reference_Topology")
+
+    try:
+        os.mkdir(sisrs_dir+"/Reads")
+        os.mkdir(sisrs_dir+"/Reads/RawReads")
+        os.mkdir(sisrs_dir+"/Reads/TrimReads")
+        os.mkdir(sisrs_dir+"/Reads/SubsetReads")
+        os.mkdir(sisrs_dir+"/SISRS_Run")
+        #os.mkdir(sisrs_dir+"/Reference_Genome")
+        #os.mkdir(sisrs_dir+"/Reference_Genome/Annotations")
+        #os.mkdir(sisrs_dir+"/Post_SISRS_Processing")
+        #os.mkdir(sisrs_dir+"/R_Analyses")
+        #os.mkdir(sisrs_dir+"/Reference_Topology")
+    except:
+        print("SISRS RUN ALREADY EXISTS HERE! IF YOU ARE ADDING NEW DATA USE FLAG -aD or -aT.\n")
+        print("OTHERWISE CHANGE DIRECTORIES AND TRY AGAIN. PROGRAM EXITING!")
+        exit()
+
 
     for x in taxa_list:
         os.mkdir(sisrs_dir+"/Reads/RawReads/"+x)
@@ -106,10 +117,10 @@ if __name__ == "__main__":
     rd = ""
     if '-id' in cmd:
         id = cmd[cmd.index('-id') + 1]
-    elif '-rd' in cmd:
-        rd = cmd[cmd.index('-rd') + 1]
+    elif '-d' in cmd or '--data' in cmd:
+        rd = isFound('-d','--data',cmd)
     else:
-        print("MISSING TAXA INFORMATION")
+        print("MISSING TAXA INFORMATION (-d,--data)")
         exit()
 
     # Grab the taxon names
@@ -123,7 +134,7 @@ if __name__ == "__main__":
     fileStructure(sisrs, tl)
 
     if rd != "":
-        if '-trm' in cmd:
+        if '-trm' in cmd or '--trimmed' in cmd:
             makeLinks(rd, sisrs, tl, True)
         else:
             makeLinks(rd, sisrs, tl, False)

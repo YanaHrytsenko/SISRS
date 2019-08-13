@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
 
-# This script prepares data for a SISRS run by setting the data up and creating mapping scripts
-# Contigs are renamed and moved to the SISRS_Run/Composite_Genome directory
-# The composite genome is indexed by Bowtie2 and Samtools
-# SISRS scripts are generated from a template and saved to the SISRS_Run/TAXA folder
+'''
+This script prepares data for a SISRS run by setting the data up and creating
+mapping scripts
+Contigs are renamed and moved to the SISRS_Run/Composite_Genome directory
+The composite genome is indexed by Bowtie2 and Samtools
+SISRS scripts are generated from a template and saved to the SISRS_Run/TAXA folder
+Input: -p/--processors Number of processors, -mr/--minRead, and -thresh/--threshold
+'''
 
 import os
 from os import path
 import sys
 from glob import glob
+from cmdCheck import *
 import pandas as pd
 
 '''
@@ -159,34 +164,35 @@ if __name__ == '__main__':
     proc = 1
     mr = 3
     thres = 1
-    if '-th' in cmd:
+
+    if '-p' in cmd or '--processors' in cmd:
         try:
-            proc = int(cmd[cmd.index('-th') + 1])
+            proc = int(isFound('-p','--processors',cmd))
         except:
-            print("INVALID NUMBER OF THREADS: RESTING THREAD COUNT TO 1")
+            print("INVALID NUMBER OF PROCESSORS (-p,--processors): DEFAULT PROCESSOR COUNT TO 1")
             proc = 1
     else:
-        print("SETTING THREAD COUNT TO 1")
+        print("SETTING PROCESSORS COUNT (-p,--processors) TO 1")
         proc = 1
 
-    if '-mr' in cmd:
+    if '-mr' in cmd or '--minread' in cmd:
         try:
-            mr = int(cmd[cmd.index('-mr') + 1])
+            mr = int(isFound('-mr','--minread',cmd))
         except:
-            print("INVALID NUMBER OF MINREAD: RESTING THREAD COUNT TO 3")
+            print("INVALID NUMBER OF MINREAD (-mr,--minread): DEFAULT THREAD COUNT TO 3")
             mr = 3
     else:
-        print("SETTING THREAD COUNT TO 3")
+        print("SETTING MINREAD (-mr,--minreads TO 3")
         mr = 3
 
-    if '-thrs' in cmd:
+    if '-thresh' in cmd or '--threshold' in cmd:
         try:
-            thres = int(cmd[cmd.index('-thrs') + 1])
+            thres = int(isFound('-thresh','--threshold',cmd))
         except:
-            print("INVALID NUMBER OF THRESHOLD: RESTING THREAD COUNT TO 1")
+            print("INVALID NUMBER OF THRESHOLD (-thresh,--threshold): DEFAULT THRESHOLD COUNT TO 1")
             thres = 1
     else:
-        print("SETTING THRESHOLD COUNT TO 1")
+        print("SETTING THRESHOLD COUNT (-thresh,--threshold) TO 1")
         thres = 1
 
     trim_read_tax_dirs,ray_dir,sisrs,composite_dir = obtainDir(sis)
