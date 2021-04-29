@@ -1,4 +1,4 @@
-test branching remove after
+test_yana
 # *SISRS* v2.0 SNP Identification from Short Read Sequences
 
 
